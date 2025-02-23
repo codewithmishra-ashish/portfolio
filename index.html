@@ -139,10 +139,14 @@
             color: var(--clr-rose);
         }
 
-        .nav__toggle,
-        .nav__close {
+        .nav__toggle {
             display: none;
             font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .nav__menu {
+            transition: var(--transition);
         }
 
         .nav__menu.show-menu {
@@ -339,6 +343,7 @@
                 background-color: var(--clr-dark);
                 padding: 2rem;
                 transition: var(--transition);
+                z-index: 99;
             }
 
             .nav__menu.show-menu {
@@ -351,8 +356,7 @@
                 gap: 1.5rem;
             }
 
-            .nav__toggle,
-            .nav__close {
+            .nav__toggle {
                 display: block;
             }
 
@@ -399,17 +403,14 @@
                     <li class="nav__item"><a href="#work" class="nav__link">Projects</a></li>
                     <li class="nav__item"><a href="#contact" class="nav__link">Contact</a></li>
                 </ul>
-                <button class="nav__close" id="nav-close" aria-label="Close Menu">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
             </div>
-            <button class="nav__toggle" id="nav-toggle" aria-label="Open Menu">
+            <button class="nav__toggle" id="nav-toggle" aria-label="Toggle Menu">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </nav>
     </header>
 
-    <main class="main">
+    <main class="main" id="main-content">
         <section class="container section home" id="home">
             <img src="assets/image1.jpeg" alt="Ashish Mishra Profile Picture" class="home__img1">
             <p class="home__name">Hello, I’m Ashish Mishra 👋</p>
@@ -530,15 +531,18 @@
 
         /* Mobile Menu Toggle */
         const navToggle = document.getElementById("nav-toggle");
-        const navClose = document.getElementById("nav-close");
         const navMenu = document.getElementById("nav-menu");
+        const toggleIcon = navToggle.querySelector("i");
 
         navToggle.addEventListener("click", () => {
-            navMenu.classList.add("show-menu");
-        });
-
-        navClose.addEventListener("click", () => {
-            navMenu.classList.remove("show-menu");
+            navMenu.classList.toggle("show-menu");
+            if (navMenu.classList.contains("show-menu")) {
+                toggleIcon.classList.remove("fa-bars");
+                toggleIcon.classList.add("fa-xmark");
+            } else {
+                toggleIcon.classList.remove("fa-xmark");
+                toggleIcon.classList.add("fa-bars");
+            }
         });
 
         /* Smooth Scroll for Navigation Links */
@@ -547,8 +551,20 @@
                 e.preventDefault();
                 const targetId = link.getAttribute("href").substring(1);
                 document.getElementById(targetId).scrollIntoView({ behavior: "smooth" });
-                navMenu.classList.remove("show-menu"); // Close menu on click (mobile)
+                navMenu.classList.remove("show-menu");
+                toggleIcon.classList.remove("fa-xmark");
+                toggleIcon.classList.add("fa-bars");
             });
+        });
+
+        /* Close Menu When Clicking on Main Content */
+        const mainContent = document.getElementById("main-content");
+        mainContent.addEventListener("click", () => {
+            if (navMenu.classList.contains("show-menu")) {
+                navMenu.classList.remove("show-menu");
+                toggleIcon.classList.remove("fa-xmark");
+                toggleIcon.classList.add("fa-bars");
+            }
         });
 
         /* Animate Elements on Scroll */
