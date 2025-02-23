@@ -149,10 +149,6 @@
             transition: var(--transition);
         }
 
-        .nav__menu.show-menu {
-            top: 4rem;
-        }
-
         /* Home Section */
         .home {
             text-align: center;
@@ -340,41 +336,62 @@
                 top: -100%;
                 left: 0;
                 width: 100%;
+                height: 100vh; /* Full screen height */
                 background-color: var(--clr-dark);
                 padding: 2rem;
                 transition: var(--transition);
                 z-index: 99;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
             }
 
             .nav__menu.show-menu {
-                top: 4rem;
+                top: 0; /* Adjusted to fill screen from top */
             }
 
             .nav__list {
                 flex-direction: column;
                 align-items: center;
-                gap: 1.5rem;
+                gap: 2rem;
+            }
+
+            .nav__link {
+                font-size: 1.5rem; /* Larger text for mobile menu */
             }
 
             .nav__toggle {
                 display: block;
             }
 
+            /* Home fills screen */
+            .home {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 4rem 1.5rem;
+            }
+
             .home__title {
                 font-size: 2.5rem;
             }
 
-            .about {
-                grid-template-columns: 1fr;
-                text-align: center;
+            /* Hide other sections on mobile by default */
+            .about, .work, .contact {
+                display: none;
             }
 
-            .about__ul-container {
-                justify-content: center;
+            /* Show section when active */
+            .about.active, .work.active, .contact.active {
+                display: block;
+                min-height: 100vh; /* Full screen height for each section */
+                padding: 4rem 1.5rem;
             }
 
-            .work__container {
-                grid-template-columns: 1fr;
+            .footer {
+                display: none; /* Hide footer on mobile */
             }
         }
 
@@ -533,9 +550,10 @@
         const navToggle = document.getElementById("nav-toggle");
         const navMenu = document.getElementById("nav-menu");
         const toggleIcon = navToggle.querySelector("i");
+        const sections = document.querySelectorAll(".section");
 
         navToggle.addEventListener("click", (e) => {
-            e.stopPropagation(); // Prevent click from bubbling to main content
+            e.stopPropagation();
             navMenu.classList.toggle("show-menu");
             if (navMenu.classList.contains("show-menu")) {
                 toggleIcon.classList.remove("fa-bars");
@@ -546,22 +564,35 @@
             }
         });
 
-        /* Smooth Scroll for Navigation Links */
+        /* Navigation Logic for Mobile */
         document.querySelectorAll(".nav__link").forEach(link => {
             link.addEventListener("click", (e) => {
                 e.preventDefault();
                 const targetId = link.getAttribute("href").substring(1);
-                document.getElementById(targetId).scrollIntoView({ behavior: "smooth" });
-                navMenu.classList.remove("show-menu");
-                toggleIcon.classList.remove("fa-xmark");
-                toggleIcon.classList.add("fa-bars");
+                const targetSection = document.getElementById(targetId);
+
+                // On mobile, hide all sections except the target
+                if (window.innerWidth <= 768) {
+                    sections.forEach(section => {
+                        section.classList.remove("active");
+                        section.style.display = "none"; // Ensure hidden
+                    });
+                    targetSection.style.display = "block"; // Show target section
+                    targetSection.classList.add("active");
+                    navMenu.classList.remove("show-menu");
+                    toggleIcon.classList.remove("fa-xmark");
+                    toggleIcon.classList.add("fa-bars");
+                } else {
+                    // Desktop: Smooth scroll as before
+                    targetSection.scrollIntoView({ behavior: "smooth" });
+                }
             });
         });
 
-        /* Close Menu When Clicking or Scrolling on Main Content */
+        /* Close Menu on Main Content Click or Scroll (Mobile Only) */
         const mainContent = document.getElementById("main-content");
         const closeMenu = () => {
-            if (navMenu.classList.contains("show-menu")) {
+            if (window.innerWidth <= 768 && navMenu.classList.contains("show-menu")) {
                 navMenu.classList.remove("show-menu");
                 toggleIcon.classList.remove("fa-xmark");
                 toggleIcon.classList.add("fa-bars");
@@ -569,29 +600,56 @@
         };
 
         mainContent.addEventListener("click", (e) => {
-            // Only close if the click is outside the nav menu
             if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
                 closeMenu();
             }
         });
 
-        window.addEventListener("scroll", () => {
-            closeMenu();
-        });
+        window.addEventListener("scroll", closeMenu);
 
-        /* Animate Elements on Scroll */
+        /* Animate Elements on Scroll (Desktop Only) */
         const animateOnScroll = () => {
-            const elements = document.querySelectorAll(".section");
-            const windowHeight = window.innerHeight;
-
-            elements.forEach(element => {
-                const elementTop = element.getBoundingClientRect().top;
-                if (elementTop < windowHeight - 100) {
-                    element.classList.add("animate");
-                }
-            });
+            if (window.innerWidth > 768) {
+                const windowHeight = window.innerHeight;
+                sections.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    if (elementTop < windowHeight - 100) {
+                        element.classList.add("animate");
+                    }
+                });
+            }
         };
         window.addEventListener("scroll", animateOnScroll);
+
+        /* Initialize Mobile View */
+        window.addEventListener("load", () => {
+            if (window.innerWidth <= 768) {
+                sections.forEach(section => {
+                    if (section.id !== "home") {
+                        section.style.display = "none";
+                    } else {
+                        section.classList.add("active");
+                    }
+                });
+            }
+        });
+
+        /* Handle Window Resize */
+        window.addEventListener("resize", () => {
+            if (window.innerWidth <= 768) {
+                sections.forEach(section => {
+                    if (!section.classList.contains("active")) {
+                        section.style.display = "none";
+                    } else {
+                        section.style.display = "block";
+                    }
+                });
+            } else {
+                sections.forEach(section => {
+                    section.style.display = "block";
+                });
+            }
+        });
     </script>
 </body>
 </html>
