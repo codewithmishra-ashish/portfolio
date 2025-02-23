@@ -534,7 +534,8 @@
         const navMenu = document.getElementById("nav-menu");
         const toggleIcon = navToggle.querySelector("i");
 
-        navToggle.addEventListener("click", () => {
+        navToggle.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent click from bubbling to main content
             navMenu.classList.toggle("show-menu");
             if (navMenu.classList.contains("show-menu")) {
                 toggleIcon.classList.remove("fa-bars");
@@ -557,14 +558,25 @@
             });
         });
 
-        /* Close Menu When Clicking on Main Content */
+        /* Close Menu When Clicking or Scrolling on Main Content */
         const mainContent = document.getElementById("main-content");
-        mainContent.addEventListener("click", () => {
+        const closeMenu = () => {
             if (navMenu.classList.contains("show-menu")) {
                 navMenu.classList.remove("show-menu");
                 toggleIcon.classList.remove("fa-xmark");
                 toggleIcon.classList.add("fa-bars");
             }
+        };
+
+        mainContent.addEventListener("click", (e) => {
+            // Only close if the click is outside the nav menu
+            if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        window.addEventListener("scroll", () => {
+            closeMenu();
         });
 
         /* Animate Elements on Scroll */
